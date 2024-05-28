@@ -7,6 +7,7 @@ import org.springframework.web.server.ServerWebExchange;
 import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
+import com.example.webflux.demo.controller.model.EmployeeAuditResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
 import com.example.webflux.demo.controller.model.EmployeeStatusType;
 import com.example.webflux.demo.controller.model.EmployeeUpdateRequest;
@@ -70,5 +71,11 @@ public class EmployeeController implements EmployeesApi {
             ServerWebExchange exchange) {
                 log.info("change employee status with id: {}", id);
                 return employeeService.changeEmployeeStatus(Long.valueOf(id), status).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<EmployeeAuditResponse>> getEmployeeAuditById(String id, ServerWebExchange exchange) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEmployeeAuditById'");
     }
 }

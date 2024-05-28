@@ -62,6 +62,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmployeeFull'
 
+  /employees/admin/audit/{id}:
+    get:
+      tags:
+        - Employee
+      summary: Get employee's record audit trail by ID
+      operationId: getEmployeeAuditById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeAuditResponse'
+
   /employees/admin/serviceyear/{serviceYears}:
     get:
       tags:
@@ -175,6 +195,11 @@ components:
         - MARKETING
         - SALES
         - RETIRED
+    AuditOperationType:
+      type: string
+      enum:
+        - ADD
+        - UPDATE
     Employee:
       type: object
       properties:
@@ -275,7 +300,6 @@ components:
       properties:
         employee:
           $ref: '#/components/schemas/EmployeeFull'
-
     EmployeeApiResponse:
       type: object
       properties:
@@ -285,3 +309,28 @@ components:
           type: string
         employee:
           $ref: '#/components/schemas/EmployeeFull'
+    EmployeeAuditResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+        message:
+          type: string
+        auditItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/auditItems'
+    auditItems:
+      type: object
+      properties:
+        username:
+          type: string
+          default: ADMIN
+        field:
+          type: string
+        oldValue:
+          type: string
+        newValue:
+          type: string
+        modifiedDate:
+          type: date
