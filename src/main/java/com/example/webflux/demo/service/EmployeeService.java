@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.springframework.data.domain.Page;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
@@ -208,6 +207,106 @@ public class EmployeeService {
                     log.error("Error retrieving audit for employee: {}", id, e);
                     return Mono.just(new EmployeeAuditResponse(false, "Error retrieving audit data", null));
                 });
+    }
+
+        /**
+     * Search term will search in first name, last name, date of birth, email, address
+     * Sort one column by either dateOfBirth, salary, or serviceYears
+     * sortOrder is either ASC or DESC
+     * filter by position and status
+     * filter by salaryMin and salaryMax
+     * filter by serviceYearsMin and serviceYearsMax
+     * pagination by page and size
+     * 
+     * @param searchTerm
+     * @param sort
+     * @return
+     */
+    public Mono<PageEmployee> searchEmployees(String searchTerm, SortDirection dateOfBirth, SortDirection salary,
+            SortDirection serviceYears, EmployeePositionType position, EmployeeStatusType status, BigDecimal salaryMin,
+            BigDecimal salaryMax, Integer serviceYearsMin, Integer serviceYearsMax, Integer pageNumber,
+            Integer pageSize) {
+
+        Criteria criteria = Criteria.empty();
+
+        if (StringUtils.isNotBlank(searchTerm)) {
+            searchTerm = searchTerm.trim();
+            criteria = Criteria.where("firstName").like("%" + searchTerm + "%")
+                    .or("lastName").like("%" + searchTerm + "%")
+                    .or("email").like("%" + searchTerm + "%")
+                    // .or("dateOfBirth").like("%" + searchTerm + "%") // does not work
+                    .or("address").like("%" + searchTerm + "%");
+        }
+
+        if (position != null) {
+            criteria = criteria.and("position").is(position.name());
+        }
+
+        if (status != null) {
+            criteria = criteria.and("status").is(status.name());
+        }
+
+        if (salaryMin != null) {
+            criteria = criteria.and("salary").greaterThanOrEquals(salaryMin);
+        }
+
+        if (salaryMax != null) {
+            criteria = criteria.and("salary").lessThanOrEquals(salaryMax);
+        }
+
+        if (serviceYearsMin != null) {
+            criteria = criteria.and("serviceYears").greaterThanOrEquals(serviceYearsMin);
+        }
+
+        if (serviceYearsMax != null) {
+            criteria = criteria.and("serviceYears").lessThanOrEquals(serviceYearsMax);
+        }
+
+        Map<String, SortDirection> sortMap = new HashMap<>();
+        if (dateOfBirth != null) {
+            sortMap.put("dateOfBirth", dateOfBirth);
+        }
+        if (salary != null) {
+            sortMap.put("salary", salary);
+        }
+        if (serviceYears != null) {
+            sortMap.put("serviceYears", serviceYears);
+        }
+
+        Sort sort = null;
+        for (Map.Entry<String, SortDirection> entry : sortMap.entrySet()) {
+            sort = Sort.by(Sort.Order.by(entry.getKey()));
+            if (entry.getValue() != null) {
+                if (entry.getValue().equals(SortDirection.ASC)) {
+                    sort = sort.ascending();
+                } else if (entry.getValue().equals(SortDirection.DESC)) {
+                    sort = sort.descending();
+                } else {
+                    sort = Sort.unsorted();
+                }
+            }
+        }
+
+        if (sort == null) {
+            sort = Sort.unsorted();
+        }
+
+        if (pageNumber == null || pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (pageSize == null || pageSize < 25) {
+            pageSize = 25;
+        }
+
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+
+        Query query = Query.query(criteria).sort(sort).with(pageRequest);
+        Mono<Long> countMono = r2dbcEntityTemplate.count(query, EmployeeEntity.class);
+        Flux<EmployeeEntity> employeeFlux = r2dbcEntityTemplate.select(query, EmployeeEntity.class);
+
+        return employeeFlux.collectList()
+                .zipWith(countMono, (employees, count) -> new PageImpl<>(employees, pageRequest, count))
+                .map(employeeMapper::mapPageEmployeeEntityToPageEmployee);
     }
 
 }

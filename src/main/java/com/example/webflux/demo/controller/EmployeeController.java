@@ -93,7 +93,14 @@ public class EmployeeController implements EmployeesApi {
             @Valid EmployeePositionType position, @Valid EmployeeStatusType status, @Valid BigDecimal salaryMin,
             @Valid BigDecimal salaryMax, @Valid Integer serviceYearsMin, @Valid Integer serviceYearsMax,
             @Valid Integer pageIndex, @Valid Integer pageSize, ServerWebExchange exchange) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'searchEmployees'");
+
+        log.info("Searching employees with search term: {}, dateOfBirth: {}, salary: {}, serviceYears: {}, position: {}, status: {}, salaryMin: {}, salaryMax: {}, serviceYearsMin: {}, serviceYearsMax: {}, pageIndex: {}, pageSize: {}",
+                searchTerm, dateOfBirth, salary, serviceYears, position, status, salaryMin, salaryMax, serviceYearsMin,
+                serviceYearsMax, pageIndex, pageSize);
+
+        return employeeService
+                .searchEmployees(searchTerm, dateOfBirth, salary, serviceYears, position, status, salaryMin, salaryMax,
+                        serviceYearsMin, serviceYearsMax, pageIndex, pageSize)
+                .map(ResponseEntity::ok);
     }
 }

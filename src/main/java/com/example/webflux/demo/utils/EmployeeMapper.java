@@ -2,12 +2,14 @@ package com.example.webflux.demo.utils;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.domain.Page;
 
 import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeAuditData;
 import com.example.webflux.demo.controller.model.EmployeeFull;
+import com.example.webflux.demo.controller.model.PageEmployee;
 import com.example.webflux.demo.database.entity.EmployeeAuditEntity;
 import com.example.webflux.demo.database.entity.EmployeeEntity;
 
@@ -43,4 +45,7 @@ public interface EmployeeMapper {
 
     // for produce AuditItem
     EmployeeAuditData mapEntityToEmployeeAuditData(EmployeeAuditEntity employeeEntity);
+
+    // for search API to map Page<EmployeeEntity> to PageEmployee
+    PageEmployee mapPageEmployeeEntityToPageEmployee(Page<EmployeeEntity> page);
 }
