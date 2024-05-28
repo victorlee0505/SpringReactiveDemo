@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
+import com.example.webflux.demo.controller.model.EmployeeAuditData;
 import com.example.webflux.demo.controller.model.EmployeeFull;
 import com.example.webflux.demo.database.entity.EmployeeAuditEntity;
 import com.example.webflux.demo.database.entity.EmployeeEntity;
@@ -32,11 +33,14 @@ public interface EmployeeMapper {
     @Mapping(target = "status", ignore = true)
     EmployeeApiResponse mapEntityToEmployeeResponse(EmployeeEntity employee);
 
-    // for Audit
+    // for record Audit to DB
     @Mapping(source = "id", target = "employeeId")
     @Mapping(target = "auditId", ignore = true)
     @Mapping(target = "operationUsername", ignore = true)
     @Mapping(target = "operationType", ignore = true)
     @Mapping(target = "operationTimestamp", ignore = true)
     EmployeeAuditEntity mapEntityToEmployeeAudit(EmployeeEntity employeeEntity);
+
+    // for produce AuditItem
+    EmployeeAuditData mapEntityToEmployeeAuditData(EmployeeAuditEntity employeeEntity);
 }

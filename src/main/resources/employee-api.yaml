@@ -319,8 +319,36 @@ components:
         auditItems:
           type: array
           items:
-            $ref: '#/components/schemas/auditItems'
-    auditItems:
+            $ref: '#/components/schemas/auditItem'
+    EmployeeAuditData:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        position:
+          type: string
+        salary:
+          type: number
+          format: double
+        serviceYears:
+          type: integer
+          format: int32
+        address:
+          type: string
+        sinNumber:
+          type: string
+        driverLicenceNumber:
+          type: string
+        status:
+          type: string
+    auditItem:
       type: object
       properties:
         username:
