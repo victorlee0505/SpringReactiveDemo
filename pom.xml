@@ -137,6 +137,7 @@
                 <version>${openapi-generator.version}</version>
                 <executions>
                     <execution>
+						<id>calculator-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -150,6 +151,29 @@
                                 <skipDefaultInterface>true</skipDefaultInterface>
 								<useSpringBoot3>true</useSpringBoot3>
 								<reactive>true</reactive>
+								<generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                                <additionalModelTypeAnnotations>@lombok.Builder @lombok.AllArgsConstructor @lombok.NoArgsConstructor</additionalModelTypeAnnotations>
+                            </configOptions>
+                            <apiPackage>com.example.webflux.demo.controller</apiPackage>
+                            <modelPackage>com.example.webflux.demo.controller.model</modelPackage>
+                        </configuration>
+                    </execution>
+					<execution>
+						<id>employee-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+								${project.basedir}/src/main/resources/employee-api.yaml
+                            </inputSpec>
+                            <generatorName>spring</generatorName>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+								<useSpringBoot3>true</useSpringBoot3>
+								<reactive>true</reactive>
+								<generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
                                 <additionalModelTypeAnnotations>@lombok.Builder @lombok.AllArgsConstructor @lombok.NoArgsConstructor</additionalModelTypeAnnotations>
                             </configOptions>
                             <apiPackage>com.example.webflux.demo.controller</apiPackage>

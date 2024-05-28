@@ -1,0 +1,281 @@
+openapi: 3.0.1
+info:
+  title: Employee API
+  description: API for managing employee records.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /employees/admin/all:
+    get:
+      tags:
+        - Employee
+      summary: Get all employees
+      operationId: getAllEmployees
+      responses:
+        '200':
+          description: A list of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+
+  /employees/admin/find/{id}:
+    get:
+      tags:
+        - Employee
+      summary: Get employee by ID
+      operationId: getEmployeeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employees/admin/findfull/{id}:
+    get:
+      tags:
+        - Employee
+      summary: Get employee by ID
+      operationId: getEmployeeFullById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeFull'
+
+  /employees/admin/serviceyear/{serviceYears}:
+    get:
+      tags:
+        - Employee
+      summary: Get employees by service years less than the specified value
+      operationId: getEmployeesByServiceYearsLessThan
+      parameters:
+        - name: serviceYears
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+
+  /employees/admin/add:
+    post:
+      tags:
+        - Employee
+      summary: Add a new employee
+      operationId: addEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeAddRequest'
+      responses:
+        '200':
+          description: Newly created employee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeAddResponse'
+
+  /employees/admin/update/{id}:
+    put:
+      tags:
+        - Employee
+      summary: update an employee
+      operationId: updateEmployee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeAddRequest'
+      responses:
+        '200':
+          description: Updated employee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeAddResponse'
+
+  /employees/admin/status/{id}:
+    patch:
+      tags:
+        - Employee
+      summary: change employee's status
+      operationId: changeEmployeeStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/EmployeeStatusType'
+      responses:
+        '200':
+          description: change employee's status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+components:
+  schemas:
+    EmployeeStatusType:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+    EmployeePositionType:
+      type: string
+      enum:
+        - ADMIN
+        - MANAGER
+        - DEVELOPER
+        - BA
+        - QA
+        - HR
+        - FINANCE
+        - MARKETING
+        - SALES
+        - RETIRED
+    Employee:
+      type: object
+      properties:
+        id:
+          type: long
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        position:
+          type: string
+        salary:
+          type: number
+          format: double
+        serviceYears:
+          type: integer
+          format: int32
+        status:
+          type: string
+    EmployeeFull:
+      type: object
+      properties:
+        id:
+          type: long
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        position:
+          type: string
+        salary:
+          type: number
+          format: double
+        serviceYears:
+          type: integer
+          format: int32
+        address:
+          type: string
+        sinNumber:
+          type: string
+        driverLicenceNumber:
+          type: string
+        status:
+          type: string
+    EmployeeAddRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - dateOfBirth
+        - position
+        - salary
+        - serviceYears
+        - address
+        - sinNumber
+        - status
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        position:
+          type: string
+        salary:
+          type: number
+          format: float
+        serviceYears:
+          type: integer
+          format: int32
+        address:
+          type: string
+        sinNumber:
+          type: string
+        driverLicenceNumber:
+          type: string
+        status:
+          type: string
+    EmployeeAddResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+        message:
+          type: string
+        employee:
+          $ref: '#/components/schemas/EmployeeFull'
