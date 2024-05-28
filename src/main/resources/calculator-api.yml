@@ -56,3 +56,9 @@ components:
         result:
           type: number
           description: The result of the calculation
+        success:
+          type: boolean
+          description: The status of the calculation
+        error:
+          type: string
+          description: The error message if the calculation failed
