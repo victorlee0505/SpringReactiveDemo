@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
   title: Employee API
   description: API for managing employee records.
@@ -30,7 +30,7 @@ paths:
       operationId: searchEmployees
       parameters:
         - name: searchTerm
-          description: Search term will search in first name, last name, date of birth, email, address
+          description: Search term will search in first name, last name, email, address
           in: query
           required: false
           schema:
@@ -372,7 +372,7 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: integer
           format: int64
         firstName:
           type: string
@@ -410,7 +410,7 @@ components:
       type: object
       properties:
         id:
-          type: number
+          type: integer
           format: int64
         firstName:
           type: string
