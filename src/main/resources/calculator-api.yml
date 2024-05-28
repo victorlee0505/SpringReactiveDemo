@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Calculator API
+  description: A simple calculator API
+paths:
+  /cal/result:
+    post:
+      summary: Calculate the result of an expression
+      operationId: calculateResult
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculationRequest'
+              properties:
+                expression:
+                  type: string
+                  description: The expression to calculate
+      responses:
+        '200':
+          description: The result of the calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResponse'
+        '400':
+          description: Invalid expression
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The error message
+components:
+  schemas:
+    CalculationRequest:
+      type: object
+      properties:
+        operator:
+          type: string
+          description: +, -, *, /
+        operand1:
+          type: number
+          description: The first operand
+        operand2:
+          type: number
+          description: The second operand
+
+    CalculationResponse:
+      type: object
+      properties:
+        result:
+          type: number
+          description: The result of the calculation
