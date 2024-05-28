@@ -9,10 +9,6 @@ spring:
         url: r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1
         username: sa
         password:
-  jpa:
-      database-platform: org.hibernate.dialect.H2Dialect
-      hibernate:
-          ddl-auto: update
 logging:
   level:
     root: DEBUG
