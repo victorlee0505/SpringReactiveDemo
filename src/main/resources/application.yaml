@@ -1,5 +1,5 @@
 server:
-  port: 7001
+  port: 8080
 spring:
   application:
     name: webflux-demo
@@ -12,6 +12,7 @@ spring:
 logging:
   level:
     root: DEBUG
+  config: classpath:log4j2-file.xml
 management:
   endpoints:
     web:

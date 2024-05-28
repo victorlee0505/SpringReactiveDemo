@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info"
+               strict="true"
+               name="XMLConfig" monitorInterval="10" packages="com.microsoft.applicationinsights.log4j.v2">
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT" >
+            <PatternLayout pattern="%d R=%r %-5p [%t] [%marker] %X %c.%M:%L - %m%n" />
+        </Console>
+        <RollingFile name="DAILY_LOG" fileName="logs/demo.log" filePattern="logs/demo_%d{yyyyMMdd}_%i.log">
+            <PatternLayout>
+                <pattern>%d R=%r %-5p [%t] [%marker] %X %c.%M:%L - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" />
+                <OnStartupTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="300"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="debug" >
+            <AppenderRef ref="STDOUT" />
+            <AppenderRef ref="DAILY_LOG"/>
+        </Root>
+
+        <Logger name="org" level="info" />
+		<logger name="org.springframework" level="info" />
+        <logger name="io.netty" level="info" />
+        <logger name="com.zaxxer.hikari" level="info" />
+        <logger name="io.netty" level="info" />
+        <logger name="reactor.netty" level="info" />
+        <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+            <AppenderRef ref="DAILY_LOG"/>
+        </Logger>
+        <Logger name="org.hibernate.orm.jdbc.bind" level="trace" additivity="false">
+            <AppenderRef ref="DAILY_LOG"/>
+        </Logger>
+    </Loggers>
+</Configuration>
