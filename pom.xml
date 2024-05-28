@@ -245,6 +245,14 @@
 								${project.basedir}/src/main/resources/employee-api.yaml
                             </inputSpec>
                             <generatorName>spring</generatorName>
+							<typeMappings>
+								<typeMapping>object+pageable=Pageable</typeMapping>
+								<!-- <typeMapping>object+sort=Sort</typeMapping> -->
+							</typeMappings>
+							<schemaMappings>
+								<schemaMapping>Pageable=org.springframework.data.domain.Pageable</schemaMapping>
+								<!-- <schemaMapping>Sort=org.springframework.data.domain.Sort</schemaMapping> -->
+							</schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>

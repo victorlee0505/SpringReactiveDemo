@@ -1,5 +1,9 @@
 package com.example.webflux.demo.controller;
 
+import java.math.BigDecimal;
+
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -9,8 +13,12 @@ import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeAuditResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
+import com.example.webflux.demo.controller.model.EmployeePositionType;
 import com.example.webflux.demo.controller.model.EmployeeStatusType;
 import com.example.webflux.demo.controller.model.EmployeeUpdateRequest;
+import com.example.webflux.demo.controller.model.PageEmployee;
+import com.example.webflux.demo.controller.model.SortDirection;
+import com.example.webflux.demo.controller.model.SortOptions;
 import com.example.webflux.demo.service.EmployeeService;
 
 import jakarta.validation.Valid;
@@ -77,5 +85,15 @@ public class EmployeeController implements EmployeesApi {
     public Mono<ResponseEntity<EmployeeAuditResponse>> getEmployeeAuditById(String id, ServerWebExchange exchange) {
         log.info("Getting employee audit by id: {}", id);
         return employeeService.getEmployeeAuditById(id).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<PageEmployee>> searchEmployees(@Valid String searchTerm,
+            @Valid SortDirection dateOfBirth, @Valid SortDirection salary, @Valid SortDirection serviceYears,
+            @Valid EmployeePositionType position, @Valid EmployeeStatusType status, @Valid BigDecimal salaryMin,
+            @Valid BigDecimal salaryMax, @Valid Integer serviceYearsMin, @Valid Integer serviceYearsMax,
+            @Valid Integer pageIndex, @Valid Integer pageSize, ServerWebExchange exchange) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'searchEmployees'");
     }
 }

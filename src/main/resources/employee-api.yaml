@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Employee API
   description: API for managing employee records.
@@ -21,6 +21,91 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Employee'
+
+  /employees/admin/search:
+    get:
+      tags:
+        - Employee
+      summary: Search employees
+      operationId: searchEmployees
+      parameters:
+        - name: searchTerm
+          description: Search term will search in first name, last name, date of birth, email, address
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: dateOfBirth
+          in: query
+          description: Sort by date of birth
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+        - name: salary
+          in: query
+          description: Sort by salary
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+        - name: serviceYears
+          in: query
+          description: Sort by service years
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+        - name: position
+          in: query
+          description: Filter by position type 
+          required: false
+          schema:
+            $ref: '#/components/schemas/EmployeePositionType'
+        - name: status
+          in: query
+          description: Filter by status type
+          required: false
+          schema:
+            $ref: '#/components/schemas/EmployeeStatusType'
+        - name: salaryMin
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: salaryMax
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: serviceYearsMin
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: serviceYearsMax
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: Zero-based page index (0..N)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: pageSize
+          in: query
+          description: The size of the page to be returned
+          required: false
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: A list of employees
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageEmployee'
 
   /employees/admin/find/{id}:
     get:
@@ -176,7 +261,90 @@ paths:
                 $ref: '#/components/schemas/Employee'
 
 components:
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      schema:
+        type: integer
+        default: 0
+      description: Zero-based page index (0..N)
+    sizeParam:
+      in: query
+      name: size
+      schema:
+        type: integer
+        default: 25
+      description: The size of the page to be returned
+    sortParam:
+      in: query
+      name: sort
+      schema:
+        type: array
+        items:
+          type: string
+      description: 'Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.'
   schemas:
+    PaginationResponse:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+          default: 0
+        totalPages:
+          type: integer
+          default: 0
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        empty:
+          type: boolean
+        content:
+          type: array
+          items: {}
+    Pageable:
+      type: object
+      format: pageable
+      properties:
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    SortOptions:
+      type: object
+      properties:
+        dateOfBirth:
+          $ref: '#/components/schemas/SortDirection'
+        salary:
+          $ref: '#/components/schemas/SortDirection'
+        serviceYears:
+          $ref: '#/components/schemas/SortDirection'
+    SortDirection:
+      type: string
+      enum:
+        - ASC
+        - DESC
+    FilterOptions:
+      type: object
+      properties:
+        position:
+          type: boolean
+          default: false
+        status:
+          type: boolean
+          default: false
     EmployeeStatusType:
       type: string
       enum:
@@ -204,7 +372,7 @@ components:
       type: object
       properties:
         id:
-          type: long
+          type: number
           format: int64
         firstName:
           type: string
@@ -223,13 +391,26 @@ components:
         serviceYears:
           type: integer
           format: int32
+        address:
+          type: string
         status:
           type: string
+    PageEmployee:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PaginationResponse'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Employee'
+              default: []
     EmployeeFull:
       type: object
       properties:
         id:
-          type: long
+          type: number
           format: int64
         firstName:
           type: string
@@ -361,4 +542,5 @@ components:
         newValue:
           type: string
         modifiedDate:
-          type: date
+          type: string
+          format: date
