@@ -75,7 +75,7 @@ public class EmployeeController implements EmployeesApi {
 
     @Override
     public Mono<ResponseEntity<EmployeeAuditResponse>> getEmployeeAuditById(String id, ServerWebExchange exchange) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmployeeAuditById'");
+        log.info("Getting employee audit by id: {}", id);
+        return employeeService.getEmployeeAuditById(id).map(ResponseEntity::ok);
     }
 }
