@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
-import com.example.webflux.demo.controller.model.EmployeeAddResponse;
+import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
 import com.example.webflux.demo.controller.model.EmployeePositionType;
 import com.example.webflux.demo.controller.model.EmployeeStatusType;
@@ -114,7 +114,7 @@ public class EmployeeMapperTest {
                 .status(EmployeeStatusType.ACTIVE.name())
                 .build();
 
-        EmployeeAddResponse employeeAddResponse = employeeMapper.mapEntityToEmployeeResponse(employeeEntity);
+        EmployeeApiResponse employeeAddResponse = employeeMapper.mapEntityToEmployeeResponse(employeeEntity);
 
         assertEquals(employeeEntity.getId(), employeeAddResponse.getEmployee().getId());
         assertEquals(employeeEntity.getFirstName(), employeeAddResponse.getEmployee().getFirstName());

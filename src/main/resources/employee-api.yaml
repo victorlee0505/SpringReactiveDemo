@@ -102,7 +102,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmployeeAddResponse'
+                $ref: '#/components/schemas/EmployeeApiResponse'
 
   /employees/admin/update/{id}:
     put:
@@ -121,14 +121,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmployeeAddRequest'
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
       responses:
         '200':
           description: Updated employee
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmployeeAddResponse'
+                $ref: '#/components/schemas/EmployeeApiResponse'
 
   /employees/admin/status/{id}:
     patch:
@@ -270,7 +270,13 @@ components:
           type: string
         status:
           type: string
-    EmployeeAddResponse:
+    EmployeeUpdateRequest:
+      type: object
+      properties:
+        employee:
+          $ref: '#/components/schemas/EmployeeFull'
+
+    EmployeeApiResponse:
       type: object
       properties:
         status:
