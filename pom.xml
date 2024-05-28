@@ -134,7 +134,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/calculator-api.yml
+                                ${project.basedir}/src/main/resources/calculator-api.yaml
                             </inputSpec>
                             <generatorName>spring</generatorName>
                             <configOptions>
