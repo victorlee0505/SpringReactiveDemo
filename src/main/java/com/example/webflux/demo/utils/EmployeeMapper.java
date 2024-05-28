@@ -7,7 +7,7 @@ import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
-import com.example.webflux.demo.controller.model.EmployeeUpdateRequest;
+import com.example.webflux.demo.database.entity.EmployeeAuditEntity;
 import com.example.webflux.demo.database.entity.EmployeeEntity;
 
 /**
@@ -27,13 +27,16 @@ public interface EmployeeMapper {
     @Mapping(target = "updateDatetime", ignore = true)
     EmployeeEntity mapRequestToEmployeeEntity(EmployeeAddRequest employee);
 
-    // for update to DB
-    @Mapping(target = "createDatetime", ignore = true)
-    @Mapping(target = "updateDatetime", ignore = true)
-    EmployeeEntity mapUpdateToEmployeeEntity(EmployeeFull employee);
-
     // for DB to EmployeeAddREsponse
     @Mapping(target = "message", ignore = true)
     @Mapping(target = "status", ignore = true)
     EmployeeApiResponse mapEntityToEmployeeResponse(EmployeeEntity employee);
+
+    // for Audit
+    @Mapping(source = "id", target = "employeeId")
+    @Mapping(target = "auditId", ignore = true)
+    @Mapping(target = "operationUsername", ignore = true)
+    @Mapping(target = "operationType", ignore = true)
+    @Mapping(target = "operationTimestamp", ignore = true)
+    EmployeeAuditEntity mapEntityToEmployeeAudit(EmployeeEntity employeeEntity);
 }

@@ -1,6 +1,7 @@
 package com.example.webflux.demo.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
 import com.example.webflux.demo.controller.model.EmployeePositionType;
 import com.example.webflux.demo.controller.model.EmployeeStatusType;
+import com.example.webflux.demo.database.entity.EmployeeAuditEntity;
 import com.example.webflux.demo.database.entity.EmployeeEntity;
 
 @SpringBootTest
@@ -129,5 +131,44 @@ public class EmployeeMapperTest {
         assertEquals(employeeEntity.getDriverLicenceNumber(), employeeAddResponse.getEmployee().getDriverLicenceNumber());
         assertEquals(employeeEntity.getStatus(), employeeAddResponse.getEmployee().getStatus());
         
+    }
+
+    @Test
+    public void testMapEntityToEmployeeAudit() {
+        EmployeeEntity employeeEntity = EmployeeEntity.builder()
+                .id(1L)
+                .firstName("John")
+                .lastName("Doe")
+                .email("test@test.com")
+                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                .position(EmployeePositionType.ADMIN.name())
+                .salary(BigDecimal.valueOf(10000))
+                .serviceYears(5)
+                .address("123 Test St")
+                .sinNumber("123-456-789")
+                .driverLicenceNumber("123456789")
+                .status(EmployeeStatusType.ACTIVE.name())
+                .build();
+
+        EmployeeAuditEntity employeeAuditEntity = employeeMapper.mapEntityToEmployeeAudit(employeeEntity);
+
+        assertEquals(employeeEntity.getId(), employeeAuditEntity.getEmployeeId());
+        assertEquals(employeeEntity.getFirstName(), employeeAuditEntity.getFirstName());
+        assertEquals(employeeEntity.getLastName(), employeeAuditEntity.getLastName());
+        assertEquals(employeeEntity.getEmail(), employeeAuditEntity.getEmail());
+        assertEquals(employeeEntity.getDateOfBirth(), employeeAuditEntity.getDateOfBirth());
+        assertEquals(employeeEntity.getPosition(), employeeAuditEntity.getPosition());
+        assertEquals(employeeEntity.getSalary().doubleValue(), employeeAuditEntity.getSalary().doubleValue());
+        assertEquals(employeeEntity.getServiceYears(), employeeAuditEntity.getServiceYears());
+        assertEquals(employeeEntity.getAddress(), employeeAuditEntity.getAddress());
+        assertEquals(employeeEntity.getSinNumber(), employeeAuditEntity.getSinNumber());
+        assertEquals(employeeEntity.getDriverLicenceNumber(), employeeAuditEntity.getDriverLicenceNumber());
+        assertEquals(employeeEntity.getStatus(), employeeAuditEntity.getStatus());
+
+        assertNull(employeeAuditEntity.getAuditId());
+        assertNull(employeeAuditEntity.getOperationUsername());
+        assertNull(employeeAuditEntity.getOperationType());
+        assertNull(employeeAuditEntity.getOperationTimestamp());
+
     }
 }

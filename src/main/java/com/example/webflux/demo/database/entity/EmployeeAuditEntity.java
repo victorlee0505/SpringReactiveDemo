@@ -1,6 +1,5 @@
 package com.example.webflux.demo.database.entity;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,13 +15,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder=true)
-@Table(name = "EMPLOYEE")
-public class EmployeeEntity implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+@Builder
+@Table(name = "EMPLOYEE_AUDIT")
+public class EmployeeAuditEntity {
     @Id
-    private Long id;
+    private Long auditId;
+
+    private Long employeeId;
 
     private String firstName;
 
@@ -46,7 +45,9 @@ public class EmployeeEntity implements Serializable {
 
     private String status;
 
-    private LocalDateTime createDatetime;
+    private String operationUsername;
 
-    private LocalDateTime updateDatetime;
+    private String operationType;
+
+    private LocalDateTime operationTimestamp;
 }

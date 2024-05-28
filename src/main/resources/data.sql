@@ -16,8 +16,55 @@ CREATE TABLE EMPLOYEE (
     update_datetime DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE EMPLOYEE_AUDIT (
+    audit_id LONG AUTO_INCREMENT PRIMARY KEY,
+    employee_id LONG,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    email VARCHAR(100),
+    date_of_birth DATE,
+    position VARCHAR(100),
+    salary DECIMAL(10, 2),
+    service_years INT,
+    address VARCHAR(255),
+    sin_number VARCHAR(100),
+    driver_licence_number VARCHAR(100),
+    status VARCHAR(50),
+    operation_username VARCHAR(100),
+    operation_type VARCHAR(10),
+    operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES EMPLOYEE(id)
+);
+
+-- ------------------------------ Database Level Triggers ------------------------------ (does not work in H2, just FYI)
+-- CREATE TRIGGER after_employee_insert
+-- AFTER INSERT ON EMPLOYEE
+-- FOR EACH ROW
+-- BEGIN
+--     INSERT INTO EMPLOYEE_AUDIT (
+--         employee_id, first_name, last_name, email, date_of_birth, position, salary,
+--         service_years, address, sin_number, driver_licence_number, status, operation_username, operation_type
+--     ) VALUES (
+--         NEW.id, NEW.first_name, NEW.last_name, NEW.email, NEW.date_of_birth, NEW.position, NEW.salary,
+--         NEW.service_years, NEW.address, NEW.sin_number, NEW.driver_licence_number, NEW.status, 'ADMIN', 'INSERT'
+--     );
+-- END;
+
+-- CREATE TRIGGER after_employee_update
+-- AFTER UPDATE ON EMPLOYEE
+-- FOR EACH ROW
+-- BEGIN
+--     INSERT INTO EMPLOYEE_AUDIT (
+--         employee_id, first_name, last_name, email, date_of_birth, position, salary,
+--         service_years, address, sin_number, driver_licence_number, status, operation_username, operation_type
+--     ) VALUES (
+--         NEW.id, NEW.first_name, NEW.last_name, NEW.email, NEW.date_of_birth, NEW.position, NEW.salary,
+--         NEW.service_years, NEW.address, NEW.sin_number, NEW.driver_licence_number, NEW.status, 'ADMIN', 'UPDATE'
+--     );
+-- END;
+
 -- Insert dummy data into EMPLOYEE table
-INSERT INTO EMPLOYEE (first_name, last_name, email, date_of_birth, salary, service_years, address, SIN_number, driver_licence_number, position, status) VALUES
+INSERT INTO EMPLOYEE (first_name, last_name, email, date_of_birth, salary, service_years, address, sin_number, driver_licence_number, position, status) VALUES
 ('John', 'Doe', 'john.doe1@example.com', '1985-07-14', 50000.00, 5, '123 Elm St, Springfield, SP', '123456789', 'D1234567', 'ADMIN', 'ACTIVE'),
 ('Jane', 'Smith', 'jane.smith2@example.com', '1990-08-05', 55000.00, 3, '456 Oak St, Metropolis, MP', '234567890', 'D2345678', 'MANAGER', 'INACTIVE'),
 ('Alice', 'Johnson', 'alice.johnson3@example.com', '1983-11-22', 60000.00, 7, '789 Pine St, Gotham, GH', '345678901', 'D3456789', 'DEVELOPER', 'ACTIVE'),

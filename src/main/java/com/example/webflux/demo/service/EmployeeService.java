@@ -6,13 +6,17 @@ import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
+import com.example.webflux.demo.controller.model.AuditOperationType;
 import com.example.webflux.demo.controller.model.Employee;
 import com.example.webflux.demo.controller.model.EmployeeAddRequest;
 import com.example.webflux.demo.controller.model.EmployeeApiResponse;
 import com.example.webflux.demo.controller.model.EmployeeFull;
 import com.example.webflux.demo.controller.model.EmployeeStatusType;
 import com.example.webflux.demo.controller.model.EmployeeUpdateRequest;
+import com.example.webflux.demo.database.EmployeeAuditRepository;
 import com.example.webflux.demo.database.EmployeeRepository;
+import com.example.webflux.demo.database.entity.EmployeeAuditEntity;
+import com.example.webflux.demo.database.entity.EmployeeEntity;
 import com.example.webflux.demo.utils.EmployeeMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final EmployeeAuditRepository employeeAuditRepository;
     private final EmployeeMapper employeeMapper;
 
     public Flux<Employee> getAllEmployees() {
@@ -58,37 +63,50 @@ public class EmployeeService {
         return employee
                 .map(employeeMapper::mapRequestToEmployeeEntity)
                 .flatMap(employeeRepository::save)
+                .flatMap( saved -> {
+                    return employeeRepository.save(saved).flatMap( updated -> {
+                        return createEmployeeAudit(updated, "admin", AuditOperationType.ADD.name());
+                    });
+                })
                 .map(employeeMapper::mapEntityToEmployeeResponse);
     }
 
-    public Mono<EmployeeApiResponse> updateEmployee(Long id, Mono<EmployeeUpdateRequest> employee) {
+    public Mono<EmployeeApiResponse> updateEmployee(Long id, Mono<EmployeeUpdateRequest> employeeUpdateRequest) {
         log.info("Updating employee with id: {}", id);
 
         return employeeRepository.findById(id)
-                .flatMap(existingEmployee -> employee
-                        .map( request -> {
-                            existingEmployee.setFirstName(request.getEmployee().getFirstName());
-                            existingEmployee.setLastName(request.getEmployee().getLastName());
-                            existingEmployee.setEmail(request.getEmployee().getEmail());
-                            existingEmployee.setDateOfBirth(request.getEmployee().getDateOfBirth());
-                            existingEmployee.setPosition(request.getEmployee().getPosition());
-                            existingEmployee.setSalary(BigDecimal.valueOf(request.getEmployee().getSalary()));
-                            existingEmployee.setServiceYears(request.getEmployee().getServiceYears());
-                            existingEmployee.setAddress(request.getEmployee().getAddress());
-                            existingEmployee.setSinNumber(request.getEmployee().getSinNumber());
-                            existingEmployee.setDriverLicenceNumber(request.getEmployee().getDriverLicenceNumber());
-                            existingEmployee.setStatus(request.getEmployee().getStatus());
-                            existingEmployee.setUpdateDatetime(LocalDateTime.now());
-                            return existingEmployee;
-                        })
-                        .flatMap(employeeRepository::save)
-                        .map(employeeMapper::mapEntityToEmployeeResponse))
-                .switchIfEmpty(Mono.just(EmployeeApiResponse.builder().message("No employee found with ID: " + id).build()));
+                .flatMap(existingEmployee -> {
+
+                    EmployeeEntity originalEmployee = existingEmployee.toBuilder().build();
+
+                    return employeeUpdateRequest.map(request -> {
+                        existingEmployee.setFirstName(request.getEmployee().getFirstName());
+                        existingEmployee.setLastName(request.getEmployee().getLastName());
+                        existingEmployee.setEmail(request.getEmployee().getEmail());
+                        existingEmployee.setDateOfBirth(request.getEmployee().getDateOfBirth());
+                        existingEmployee.setPosition(request.getEmployee().getPosition());
+                        existingEmployee.setSalary(BigDecimal.valueOf(request.getEmployee().getSalary()));
+                        existingEmployee.setServiceYears(request.getEmployee().getServiceYears());
+                        existingEmployee.setAddress(request.getEmployee().getAddress());
+                        existingEmployee.setSinNumber(request.getEmployee().getSinNumber());
+                        existingEmployee.setDriverLicenceNumber(request.getEmployee().getDriverLicenceNumber());
+                        existingEmployee.setStatus(request.getEmployee().getStatus());
+                        existingEmployee.setUpdateDatetime(LocalDateTime.now());
+                        return existingEmployee;
+                    })
+                            .flatMap(toBeUpdated -> {
+                                return createEmployeeAudit(originalEmployee, "admin", AuditOperationType.UPDATE.name())
+                                        .then(employeeRepository.save(toBeUpdated));
+                            })
+                            .map(employeeMapper::mapEntityToEmployeeResponse);
+                })
+                .switchIfEmpty(
+                        Mono.just(EmployeeApiResponse.builder().message("No employee found with ID: " + id).build()));
     }
 
     public Mono<Employee> changeEmployeeStatus(Long id, EmployeeStatusType status) {
         log.info("Deleting employee with id: {}", id);
-        
+
         return employeeRepository.findById(id)
                 .map(employee -> {
                     employee.setStatus(status.name());
@@ -97,6 +115,18 @@ public class EmployeeService {
                 .flatMap(employeeRepository::save)
                 .flatMap(updated -> Mono.just(employeeMapper.mapToEmployee(updated)))
                 .switchIfEmpty(Mono.error(new NoSuchElementException("No employee found with ID: " + id)));
-
     }
+
+    public Mono<EmployeeEntity> createEmployeeAudit(EmployeeEntity employee, String username, String operationType) {
+        log.info("Creating audit for employee: {}", employee.getId());
+        EmployeeAuditEntity auditEntity = employeeMapper.mapEntityToEmployeeAudit(employee);
+
+        auditEntity.setOperationUsername(username);
+        auditEntity.setOperationType(operationType);
+        auditEntity.setOperationTimestamp(LocalDateTime.now());
+
+        return employeeAuditRepository.save(auditEntity)
+                .thenReturn(employee);
+    }
+
 }
