@@ -44,13 +44,25 @@ public class EmployeeController implements EmployeesApi {
     @Override
     public Mono<ResponseEntity<Employee>> getEmployeeById(String id, ServerWebExchange exchange) {
         log.info("Getting employee by id: {}", id);
-        return employeeService.getEmployeeById(Long.valueOf(id)).map(ResponseEntity::ok);
+        return employeeService.getEmployeeById(Long.valueOf(id)).map(employee -> {
+            if(employee.getId() != null) {
+                return ResponseEntity.ok(employee);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        });
     }
 
     @Override
     public Mono<ResponseEntity<EmployeeFull>> getEmployeeFullById(String id, ServerWebExchange exchange) {
         log.info("Getting employee full info by id: {}", id);
-        return employeeService.getEmployeeFullById(Long.valueOf(id)).map(ResponseEntity::ok);
+        return employeeService.getEmployeeFullById(Long.valueOf(id)).map(employee -> {
+            if (employee.getId() != null) {
+                return ResponseEntity.ok(employee);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        });
     }
 
     @Override
@@ -64,27 +76,51 @@ public class EmployeeController implements EmployeesApi {
     public Mono<ResponseEntity<EmployeeApiResponse>> addEmployee(@Valid Mono<EmployeeAddRequest> employeeAddRequest,
             ServerWebExchange exchange) {
         log.info("Adding employee: {}", employeeAddRequest);
-        return employeeService.addEmployee(employeeAddRequest).map(ResponseEntity::ok);
+        return employeeService.addEmployee(employeeAddRequest).map(response -> {
+            if(response.getStatus().equals(true)) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest().body(response);
+            }
+        });
     }
 
     @Override
     public Mono<ResponseEntity<EmployeeApiResponse>> updateEmployee(String id,
             @Valid Mono<EmployeeUpdateRequest> employeeUpdateRequest, ServerWebExchange exchange) {
         log.info("Updating employee with id: {}", id);
-        return employeeService.updateEmployee(Long.valueOf(id), employeeUpdateRequest).map(ResponseEntity::ok);
+        return employeeService.updateEmployee(Long.valueOf(id), employeeUpdateRequest).map(response -> {
+            if (response.getStatus().equals(true)) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest().body(response);
+            }
+        });
     }
 
     @Override
     public Mono<ResponseEntity<Employee>> changeEmployeeStatus(String id, @NotNull @Valid EmployeeStatusType status,
             ServerWebExchange exchange) {
-                log.info("change employee status with id: {}", id);
-                return employeeService.changeEmployeeStatus(Long.valueOf(id), status).map(ResponseEntity::ok);
+        log.info("change employee status with id: {}", id);
+        return employeeService.changeEmployeeStatus(Long.valueOf(id), status).map(employee -> {
+            if (employee.getId() != null) {
+                return ResponseEntity.ok(employee);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        });
     }
 
     @Override
     public Mono<ResponseEntity<EmployeeAuditResponse>> getEmployeeAuditById(String id, ServerWebExchange exchange) {
         log.info("Getting employee audit by id: {}", id);
-        return employeeService.getEmployeeAuditById(id).map(ResponseEntity::ok);
+        return employeeService.getEmployeeAuditById(id).map(response -> {
+            if(response.getStatus().equals(true)) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest().body(response);
+            }
+        });
     }
 
     @Override

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageImpl;
@@ -13,7 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.webflux.demo.controller.model.AuditOperationType;
 import com.example.webflux.demo.controller.model.Employee;
@@ -58,13 +59,23 @@ public class EmployeeService {
     public Mono<Employee> getEmployeeById(Long id) {
         log.info("Getting employee by id: {}", id);
         return employeeRepository.findById(id)
-                .map(employeeMapper::mapToEmployee);
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with ID: " + id)))
+                .map(employeeMapper::mapToEmployee)
+                .onErrorResume(e -> {
+                    log.error("Error getting employee by id: {}", id, e);
+                    return Mono.just(Employee.builder().build());
+                });
     }
 
     public Mono<EmployeeFull> getEmployeeFullById(Long id) {
         log.info("Getting full employee by id: {}", id);
         return employeeRepository.findById(id)
-                .map(employeeMapper::mapToEmployeeFull);
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with ID: " + id)))
+                .map(employeeMapper::mapToEmployeeFull)
+                .onErrorResume(e -> {
+                    log.error("Error getting employee by id: {}", id, e);
+                    return Mono.just(EmployeeFull.builder().build());
+                });
     }
 
     public Flux<Employee> getEmployeesByServiceYearsLessThan(Integer serviceYears) {
@@ -84,13 +95,23 @@ public class EmployeeService {
                         return createEmployeeAudit(updated, "admin", AuditOperationType.ADD.name());
                     });
                 })
-                .map(employeeMapper::mapEntityToEmployeeResponse);
+                .map(employeeMapper::mapEntityToEmployeeResponse)
+                .map(response -> {
+                    response.setStatus(true);
+                    response.setMessage("Employee added successfully.");
+                    return response;
+                })
+                .onErrorResume(e -> {
+                    log.error("Error adding employee", e);
+                    return Mono.just(EmployeeApiResponse.builder().status(false).message("Error adding employee").build());
+                });
     }
 
     public Mono<EmployeeApiResponse> updateEmployee(Long id, Mono<EmployeeUpdateRequest> employeeUpdateRequest) {
         log.info("Updating employee with id: {}", id);
 
         return employeeRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with ID: " + id)))
                 .flatMap(existingEmployee -> {
 
                     EmployeeEntity originalEmployee = existingEmployee.toBuilder().build();
@@ -117,20 +138,28 @@ public class EmployeeService {
                             .map(employeeMapper::mapEntityToEmployeeResponse);
                 })
                 .switchIfEmpty(
-                        Mono.just(EmployeeApiResponse.builder().message("No employee found with ID: " + id).build()));
+                        Mono.just(EmployeeApiResponse.builder().message("No employee found with ID: " + id).build()))
+                .onErrorResume(e -> {
+                    log.error("Error updating employee", e);
+                    return Mono.just(EmployeeApiResponse.builder().status(false).message("Error updating employee: " + e.getMessage()).build());
+                });
     }
 
     public Mono<Employee> changeEmployeeStatus(Long id, EmployeeStatusType status) {
         log.info("Deleting employee with id: {}", id);
 
         return employeeRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with ID: " + id)))
                 .map(employee -> {
                     employee.setStatus(status.name());
                     return employee;
                 })
                 .flatMap(employeeRepository::save)
                 .flatMap(updated -> Mono.just(employeeMapper.mapToEmployee(updated)))
-                .switchIfEmpty(Mono.error(new NoSuchElementException("No employee found with ID: " + id)));
+                .onErrorResume(e -> {
+                    log.error("Error changing employee status", e);
+                    return Mono.just(Employee.builder().build());
+                });
     }
 
     public Mono<EmployeeEntity> createEmployeeAudit(EmployeeEntity employee, String username, String operationType) {
@@ -189,6 +218,7 @@ public class EmployeeService {
         log.info("Getting audit for employee: {}", id);
 
         return employeeRepository.findById(Long.valueOf(id))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with ID: " + id)))
                 .map(employee -> createEmployeeAuditEntity(employee, "admin", AuditOperationType.UPDATE.name(),
                         employee.getUpdateDatetime()))
                 .flux()
@@ -197,7 +227,7 @@ public class EmployeeService {
                 .collectList()
                 .map(auditItems -> {
                     if (auditItems.isEmpty()) {
-                        return new EmployeeAuditResponse(false, "No audit entries found for employee with ID: " + id,
+                        return new EmployeeAuditResponse(true, "No audit entries found for employee with ID: " + id,
                                 null);
                     } else {
                         return new EmployeeAuditResponse(true, "Audit entries retrieved successfully.", auditItems);
@@ -205,7 +235,7 @@ public class EmployeeService {
                 })
                 .onErrorResume(e -> {
                     log.error("Error retrieving audit for employee: {}", id, e);
-                    return Mono.just(new EmployeeAuditResponse(false, "Error retrieving audit data", null));
+                    return Mono.just(EmployeeAuditResponse.builder().status(false).message("Error retrieving audit data: " + e.getMessage()).build());
                 });
     }
 
